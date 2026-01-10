@@ -85,10 +85,10 @@ async def health_check():
 @app.post("/ingest", response_model=IngestResponse)
 async def ingest_document():
     """
-    Process data.docx and create vector embeddings.
+    Process RAG_Enterprise_Dataset.docx and create vector embeddings.
     
     This endpoint:
-    1. Extracts text from data.docx
+    1. Extracts text from RAG_Enterprise_Dataset.docx
     2. Chunks the text
     3. Creates embeddings and stores them in Chroma
     4. Initializes the RAG pipeline
@@ -96,8 +96,8 @@ async def ingest_document():
     global vector_store, rag_pipeline
     
     try:
-        # Check if data.docx exists
-        doc_path = "data.docx"
+        # Check if RAG_Enterprise_Dataset.docx exists
+        doc_path = "RAG_Enterprise_Dataset.docx"
         if not os.path.exists(doc_path):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -137,7 +137,7 @@ async def ingest_document():
             )
         
         # Create metadata for each chunk
-        metadatas = [{"chunk_index": i, "source": "data.docx"} for i in range(len(chunks))]
+        metadatas = [{"chunk_index": i, "source": "RAG_Enterprise_Dataset.docx"} for i in range(len(chunks))]
         
         # Create collection with chunks
         vector_store.create_collection(chunks, metadatas)

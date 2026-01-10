@@ -35,17 +35,16 @@ class VectorStore:
         # Initialize embeddings
         # Use HuggingFace embeddings (free, no API key required)
         # Default model: sentence-transformers/all-MiniLM-L6-v2
+        model_name = embedding_model or "sentence-transformers/all-MiniLM-L6-v2"
         try:
-            model_name = embedding_model or "sentence-transformers/all-MiniLM-L6-v2"
             self.embeddings = HuggingFaceEmbeddings(
                 model_name=model_name,
                 model_kwargs={'device': 'cpu'}
             )
             logger.info(f"Initialized embeddings with model: {model_name}")
         except Exception as e:
-            logger.warning(f"Error initializing embeddings: {str(e)}, using Chroma default")
-            # Fallback to Chroma's default embedding function
-            self.embeddings = None
+            logger.error(f"Error initializing embeddings: {str(e)}")
+            raise ValueError(f"Failed to initialize embeddings with model {model_name}: {str(e)}")
         
         self.vectorstore: Optional[Chroma] = None
     
@@ -62,26 +61,16 @@ class VectorStore:
             return
         
         try:
-            # Use embeddings if available, otherwise Chroma will use default
-            if self.embeddings:
-                self.vectorstore = Chroma.from_texts(
-                    texts=texts,
-                    embedding=self.embeddings,
-                    persist_directory=self.persist_directory,
-                    collection_name=self.collection_name,
-                    metadatas=metadatas or [{}] * len(texts)
-                )
-            else:
-                # Use Chroma's default embedding function
-                from chromadb.utils import embedding_functions
-                default_ef = embedding_functions.DefaultEmbeddingFunction()
-                self.vectorstore = Chroma.from_texts(
-                    texts=texts,
-                    embedding_function=default_ef,
-                    persist_directory=self.persist_directory,
-                    collection_name=self.collection_name,
-                    metadatas=metadatas or [{}] * len(texts)
-                )
+            # Use embedding parameter for LangChain Chroma
+            if self.embeddings is None:
+                raise ValueError("Embeddings not initialized")
+            self.vectorstore = Chroma.from_texts(
+                texts=texts,
+                embedding=self.embeddings,
+                persist_directory=self.persist_directory,
+                collection_name=self.collection_name,
+                metadatas=metadatas or [{}] * len(texts)
+            )
             
             logger.info(f"Created vector store with {len(texts)} documents")
         except Exception as e:
@@ -91,21 +80,14 @@ class VectorStore:
     def load_collection(self):
         """Load an existing collection from disk."""
         try:
-            if self.embeddings:
-                self.vectorstore = Chroma(
-                    persist_directory=self.persist_directory,
-                    collection_name=self.collection_name,
-                    embedding_function=self.embeddings
-                )
-            else:
-                # Use Chroma's default embedding function
-                from chromadb.utils import embedding_functions
-                default_ef = embedding_functions.DefaultEmbeddingFunction()
-                self.vectorstore = Chroma(
-                    persist_directory=self.persist_directory,
-                    collection_name=self.collection_name,
-                    embedding_function=default_ef
-                )
+            if self.embeddings is None:
+                raise ValueError("Embeddings not initialized")
+            # Use embedding_function for loading existing collections
+            self.vectorstore = Chroma(
+                persist_directory=self.persist_directory,
+                collection_name=self.collection_name,
+                embedding_function=self.embeddings
+            )
             logger.info("Loaded existing vector store")
         except Exception as e:
             logger.error(f"Error loading vector store: {str(e)}")

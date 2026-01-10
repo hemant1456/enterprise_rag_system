@@ -14,7 +14,7 @@ A production-ready Retrieval-Augmented Generation (RAG) system that processes DO
 ## Architecture
 
 ```
-data.docx → Document Processor → Text Chunker → Embeddings → Chroma DB
+RAG_Enterprise_Dataset.docx → Document Processor → Text Chunker → Embeddings → Chroma DB
                                                                     ↓
 API Request → FastAPI → RAG Pipeline ← Retrieval ← Chroma DB
                                     ↓
@@ -93,7 +93,7 @@ Returns the health status of the system.
 POST /ingest
 ```
 
-Processes `data.docx` and creates vector embeddings.
+Processes `RAG_Enterprise_Dataset.docx` and creates vector embeddings.
 
 **Response:**
 ```json
@@ -122,7 +122,7 @@ Content-Type: application/json
       "content": "Relevant text excerpt...",
       "metadata": {
         "chunk_index": 0,
-        "source": "data.docx"
+        "source": "RAG_Enterprise_Dataset.docx"
       }
     }
   ]
@@ -174,7 +174,8 @@ enterprise_rag_system/
 ├── config.py                   # Configuration management
 ├── requirements.txt            # Python dependencies
 ├── main.py                     # Application entry point
-├── data.docx                   # Input document
+├── RAG_Enterprise_Dataset.docx # Input document
+├── data_creator.py             # Script to generate the dataset
 └── README.md                   # This file
 ```
 
@@ -218,7 +219,8 @@ Once the server is running, visit:
 
 - The vector database is persisted in the `chroma_db/` directory
 - First-time embedding model download may take a few minutes
-- Ensure `data.docx` exists in the project root before calling `/ingest`
+- Ensure `RAG_Enterprise_Dataset.docx` exists in the project root before calling `/ingest`
+- You can regenerate the dataset by running `python data_creator.py`
 - The system requires an Anthropic API key for querying
 
 ## License

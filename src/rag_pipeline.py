@@ -28,7 +28,7 @@ class RAGPipeline:
         # Initialize Anthropic LLM
         self.llm = ChatAnthropic(
             anthropic_api_key=anthropic_api_key,
-            model_name="claude-3-sonnet-20240229"  # Default Claude model
+            model="claude-haiku-4-5-20251001"  # Claude Haiku model
         )
         
         # Create custom prompt template
